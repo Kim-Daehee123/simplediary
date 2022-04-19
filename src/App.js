@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import DiaryEditor from "./DiaryEditor";
 import DiaryList from "./DiaryList";
@@ -6,18 +6,39 @@ import DiaryList from "./DiaryList";
 function App() {
   const [date, setDate] = useState([]);
 
-  const dateId = useRef(0);
+  const dataId = useRef(0);
+
+  const getData = async () => {
+    const res = await fetch(
+      "https://jsonplaceholder.typicode.com/comments"
+    ).then((res) => res.json());
+
+    const initData = res.slice(0, 20).map((it) => {
+      return {
+        author: it.email,
+        content: it.body,
+        emotion: Math.floor(Math.random() * 5) + 1,
+        created_date: new Date().getTime(),
+        id: dataId.current++,
+      };
+    });
+    setDate(initData);
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
 
   const onCreate = (author, content, emotion) => {
     const created_date = new Date().getTime();
     const newItem = {
-      id: dateId.current,
+      id: dataId.current,
       author,
       emotion,
       content,
       created_date,
     };
-    dateId.current += 1;
+    dataId.current += 1;
     setDate([newItem, ...date]);
   };
 
